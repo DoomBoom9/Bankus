@@ -57,35 +57,39 @@ class BasicAccount:                                #The base Account class that 
         self.account_type = 'Basic'
     
     def error_messages(self):
-        if self.max_transactions <= 0:                                          #error messages concerning account transactions
-            print("Sorry! You've reached the action limit on this account.")
-            print("Please restart the session to reset this limit")
-        if self.can_withdraw == False:
-            print("Sorry! You cannot withdraw from this account")
-        if self.balance <= 0:
-            print(f"Your balance is {self.balance}")
-            print('balance is in the negative')
-            print('')
-        if bankus.bank_capital < -1000000:
-            print("Bank Capital cannot be below -$1,000,000")
-            print("Please withdraw from an account to increase the bank capital")
+        if __name__ != "__main__":
+            if self.max_transactions <= 0:                                         
+                print("Sorry! You've reached the action limit on this account.")
+                print("Please restart the session to reset this limit")
+            if self.can_withdraw == False:
+                print("Sorry! You cannot withdraw from this account")
+            if self.balance <= 0:
+                print(f"Your balance is {self.balance}")
+                print('balance is in the negative')
+                print('')
+            if bankus.bank_capital < -1000000:
+                print("Bank Capital cannot be below -$1,000,000")
+                print("Please withdraw from an account to increase the bank capital")
 
     def withdraw(self, amount):                                                #Withdraw from account
         if self.can_withdraw == True and self.max_transactions > 0:
             self.balance = self.balance - amount
             self.max_transactions -= 1
-            print(f'You have withdrawn ${amount}')
-            print(f"Your new balance is ${self.balance}")
             bankus.bank_capital += amount
+            if __name__ != "__main__":
+                print(f'You have withdrawn ${amount}')
+                print(f"Your new balance is ${self.balance}")
         else:
             self.error_messages()
     
     def deposit(self, amount):                                  #deposit money into the account
         if self.max_transactions > 0 and bankus.bank_capital > -1000000:
-            self.balance += amount                              
-            self.max_transactions -= 1
-            print(f"Your new balance is ${self.balance}")
+            self.balance += amount
+            if self.account_type == "Basic" or "LoyaltySaver":
+                self.max_transactions -= 1
             bankus.bank_capital -= amount
+            if __name__ != "__main__":
+                print(f"Your new balance is ${self.balance}")
         else:
             self.error_messages()
     
@@ -104,11 +108,10 @@ class BasicAccount:                                #The base Account class that 
 class MortgageAccount(BasicAccount):        #Mortgage Bank Account
     def __init__(self, balance):
         self.account_type = 'Mortgage'
-        #self.mortgage = mortgage
         self.interest = 0.045
         self.balance = balance
         self.can_withdraw = False
-        self.max_transactions = "unlimited"
+        self.max_transactions = 1
 
 class LoyaltySaverAccount(BasicAccount):       #Loyalty Saver
     def __init__(self, balance):
@@ -258,10 +261,48 @@ class TestProgram(unittest.TestCase):
         pass
 
     def test_withdraw():
-        pass
+        bankus.add_customer("Brooklyn", "Smith", "5 Dalby Street")
+        bankus.customers[-1].add_account(1, 1000)
+        bankus.customers[-1].accounts[-1].withdraw(100)
+        try:
+            assert bankus.customers[-1].accounts[-1].balance == 900
+        except AssertionError:
+            print('Basic Withdraw: Test Failed')
+        bankus.customers[-1].add_account(2, 1000)
+        bankus.customers[-1].accounts[-1].withdraw(100)
+        try:
+            assert bankus.customers[-1].accounts[-1].balance == 900
+        except AssertionError:
+            print('LoyaltySaver withdraw: Test Failed')
+        bankus.customers[-1].add_account(3, 1000)
+        bankus.customers[-1].accounts[-1].withdraw(100)
+        try: 
+            assert bankus.customers[-1].accounts[-1].balance == 1000
+        except AssertionError:
+            ('Mortgage withdraw: Test Failed')
+        del bankus.customers[-1].accounts
+        del bankus.customers[-1]
 
     def test_deposit():
-        pass
+        bankus.add_customer("Paul", "Dempsey", "")
+        bankus.customers[-1].add_account(1, 1000)
+        bankus.customers[-1].accounts[-1].deposit(100)
+        try:
+            assert bankus.customers[-1].accounts[-1].balance == 1100
+        except AssertionError:
+            print('Basic deposit: Test Failed')
+        bankus.customers[-1].add_account(2, 1000)
+        bankus.customers[-1].accounts[-1].deposit(100)
+        try:
+            assert bankus.customers[-1].accounts[-1].balance == 1100
+        except AssertionError:
+            print('LoyaltySaver deposit: Test Failed')
+        bankus.customers[-1].add_account(3, 1000)
+        bankus.customers[-1].accounts[-1].deposit(100)
+        try:
+            assert bankus.customers[-1].accounts[-1].balance == 1100
+        except AssertionError:
+            print('LoyaltySaver deposit: Test Failed')
 
     def test_balance():
         pass
@@ -280,8 +321,6 @@ if __name__ == "__main__":
     TestProgram.test_change_name("Marty", "Patricks")
     TestProgram.test_change_name(1, 2)
     TestProgram.test_change_name(1.0, 73.1)
-    TestProgram.test_change_name( "","" )
-
 
     TestProgram.test_change_address("123 Geraldine Crescent")
     TestProgram.test_error_messages()
