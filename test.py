@@ -144,19 +144,18 @@ class Customer:
         if account_type == 3: 
             accounts[count] = MortgageAccount(balance)
         
-    def change_name(self):
-        new_first_name = input('Input new first name: ')                        #new first name and last name to be updated
-        new_surname = input('Input new surname: ')
-        print(f"Name has been changed from {self.first_name} {self.surname}")      #print original name
-        print(f"Name has been changed to {new_first_name} {new_surname}")          #print new name
+    def change_name(self, new_first_name, new_surname):
+        if __name__ != "__main__":
+            print(f"Name has been changed from {self.first_name} {self.surname}")      #print original name
+            print(f"Name has been changed to {new_first_name} {new_surname}")          #print new name
         self.first_name = new_first_name                                           #update first name
         self.surname = new_surname                                                 #update last name
     
-    def change_address(self):
-        address = input("Input new address: ")                                     #new address
-        print(f'Address has been changed from {self.address}')                     #print old address      
-        print(f"Address has been changed to {address}")                            #print new address
-        self.address = address                                                     #update address
+    def change_address(self, new_address): #new address
+        if __name__ != "__main__":
+            print(f'Address has been changed from {self.address}')                     #print old address      
+            print(f"Address has been changed to {new_address}")                            #print new address
+        self.address = new_address                                                     #update address
     
     def total_balance(self):
         self.customer_capital = 0
@@ -180,10 +179,6 @@ class TestProgram(unittest.TestCase):
         bankus.add_customer("John", "Doe", "123 High Street")
         bankus.customers[-1]
         try:
-            assert bankus.customers[-1] == Customer(first_name="John", surname="Doe", address="123 High Street")
-        except AssertionError:
-            print("Create and append to list: Test Failed")
-        try:
             assert bankus.customers[-1].first_name == "John", "first name: Test Failed"
         except AssertionError:
             print("First Name: Test Failed")
@@ -195,6 +190,7 @@ class TestProgram(unittest.TestCase):
             assert bankus.customers[-1].address == "123 High Street"
         except AssertionError:
             print("Address: Test Failed")
+        del bankus.customers[-1]
   
     def test_bank_interest():
         pass
@@ -216,11 +212,9 @@ class TestProgram(unittest.TestCase):
 
     def test_add_account():
         bankus.add_customer("Jane", "Doe", "123 High Street")
-        customers = getattr(bankus, "customers")
+        customers = bankus.customers
         customers[-1].add_account(1, 3000)
         account = getattr(customers[-1], "accounts")
-       # try:
-        #    assert account[-1] == 
         try: 
             assert account[-1].account_type == "Basic"
         except AssertionError:
@@ -229,13 +223,30 @@ class TestProgram(unittest.TestCase):
             assert account[-1].balance == 3000
         except AssertionError:
             print("Balance: Test Failed")
+        del bankus.customers[-1]
         
 
-    def test_change_name():
-        pass
+    def test_change_name(firstName, last_name):
+        bankus.add_customer(firstName, last_name, "123 High Street")
+        bankus.customers[-1].change_name("Humpty", "Dumpty")
+        try:
+            assert bankus.customers[-1].first_name == "Humpty"
+        except AssertionError:
+            print('First Name Change: Test Failed')
+        try: 
+            assert bankus.customers[-1].surname == "Dumpty"
+        except AssertionError:
+            print('Surname Change: Test Failed')
+        del bankus.customers[-1]
 
-    def test_change_address():
-        pass
+    def test_change_address(address2):
+        bankus.add_customer("John", "Doe", "123 High Street")
+        bankus.customers[-1].change_address(address2)
+        try: 
+            assert bankus.customers[-1].address == address2
+        except AssertionError:
+            print('Change Address: Test Failed')
+        del bankus.customers[-1]
 
     def test_total_interest():
         pass
@@ -265,7 +276,14 @@ if __name__ == "__main__":
     TestProgram.test_save_state()
     TestProgram.test_load_state()
     TestProgram.test_add_account()
-    TestProgram.test_change_name()
+
+    TestProgram.test_change_name("Marty", "Patricks")
+    TestProgram.test_change_name(1, 2)
+    TestProgram.test_change_name(1.0, 73.1)
+    TestProgram.test_change_name( "","" )
+
+
+    TestProgram.test_change_address("123 Geraldine Crescent")
     TestProgram.test_error_messages()
     TestProgram.test_withdraw()
     TestProgram.test_deposit()
