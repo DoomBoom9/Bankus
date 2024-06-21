@@ -14,14 +14,12 @@ class Bank:
     def interest(self):                     #I MESSED THIS UP IMMA HAVE TO FULLY REDO
         new_capital = 0
         for customer in self.customers:     #iterates through the customer's accounts
-            customer_accounts = getattr(customer, "accounts")
-            for account in customer_accounts:               #calculates interest for each account of each customer
-                interest = getattr(account, "interest")
-                balance = getattr(account, "balance")
-                new_capital += (balance*(1+interest/12)**12)
+            for account in customer.accounts:               #calculates interest for each account of each customer
+                new_capital += (account.balance*(1+account.interest/12)**12)
+        new_capital += self.bank_capital
         print(f'Original capital: ${self.capital()}')           #prints the capital of the bank
         print(f'Capital next annum: ${new_capital}')            #capital post interest in 12 months
-        print(f'Interest accrewed: ${new_capital - self.capital()}')            #amount of interest over the next 12 months
+        print(f'Interest accrewed: ${self.capital() - new_capital}')            #amount of interest over the next 12 months
 
     def __repr__(self):
         return f'Bank(name={self.name}, customers={self.customers})'

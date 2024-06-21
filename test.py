@@ -13,17 +13,15 @@ class Bank:
         self.customers[-1] = Customer(first_name, surname, address)
         self.__repr__()  #Appends customers to the list of customers "owned" by the bank
     
-    def interest(self):                     
+    def interest(self):                     #I MESSED THIS UP IMMA HAVE TO FULLY REDO
         new_capital = 0
         for customer in self.customers:     #iterates through the customer's accounts
-            customer_accounts = getattr(customer, "accounts")
-            for account in customer_accounts:               #calculates interest for each account of each customer
-                interest = getattr(account, "interest")
-                balance = getattr(account, "balance")
-                new_capital += (balance*(1+interest/12)**12)
-        print(f'Original capital: ${self.bank_capital}')           #prints the capital of the bank
+            for account in customer.accounts:               #calculates interest for each account of each customer
+                new_capital += (account.balance*(1+account.interest/12)**12)
+        new_capital += self.bank_capital
+        print(f'Original capital: ${self.capital()}')           #prints the capital of the bank
         print(f'Capital next annum: ${new_capital}')            #capital post interest in 12 months
-        print(f'Interest accrewed: ${self.bank_capital - new_capital}')            #amount of interest over the next 12 months
+        print(f'Interest accrewed: ${self.capital() - new_capital}')            #amount of interest over the next 12 months
 
     def __repr__(self):
         return f'Bank(name={self.name}, customers={self.customers})'
@@ -196,7 +194,25 @@ class TestProgram(unittest.TestCase):
         del bankus.customers[-1]
   
     def test_bank_interest():
-        pass
+        bankus.bank_capital = 1000000
+        try:
+            assert bankus.interest() == 1000000
+        except AssertionError:
+            print("Bank Interest Failed")
+        bankus.bank_capital = 0
+        try:
+            assert bankus.interest() == 0
+        except AssertionError:
+            print("Bank Interest Failed")
+        
+        bankus.bank_capital = 1000000
+        bankus.add_customer("Big", "Dog", "BARK BARK WOOF WOOF")
+        bankus.customers[-1].add_account(1, 1000)
+        try:
+            assert bankus.interest() == 9999050             #Fails bc withdrawal is messed up.
+        except AssertionError:
+            print("Bank interest: Test Failed")
+
     
     def test_bank_capital():
         try:
@@ -252,12 +268,6 @@ class TestProgram(unittest.TestCase):
         del bankus.customers[-1]
 
     def test_total_interest():
-        pass
-
-    def test_list_accounts():
-        pass
-
-    def test_error_messages():
         pass
 
     def test_withdraw():
@@ -316,14 +326,16 @@ if __name__ == "__main__":
     TestProgram.test_list_customers()
     TestProgram.test_save_state()
     TestProgram.test_load_state()
-    TestProgram.test_add_account()
+    TestProgram.test_add_account() #fix the problem of bankus' balance not going doen
+    print(bankus.bank_capital)
 
     TestProgram.test_change_name("Marty", "Patricks")
     TestProgram.test_change_name(1, 2)
     TestProgram.test_change_name(1.0, 73.1)
 
     TestProgram.test_change_address("123 Geraldine Crescent")
-    TestProgram.test_error_messages()
     TestProgram.test_withdraw()
+    print(bankus.bank_capital)   #reset bankus' balance
     TestProgram.test_deposit()
+    print(bankus.bank_capital)   #reset bankus' balance
     TestProgram.test_balance()
