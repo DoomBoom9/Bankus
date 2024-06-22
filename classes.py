@@ -1,5 +1,5 @@
 import pickle
-import unittest
+import os
 
 class Bank:
     def __init__(self,name):
@@ -175,7 +175,148 @@ class Customer:
             print(f"{i+1}. {account}")
             i += 1
 
-class TestProgram(unittest.TestCase):
+class UI:
+    def add_customer_menu():
+        os.system('clear') 
+        print('Add Account Settings\n\n')
+        first_name = input('First Name: ')
+        surname = input('Surname: ')
+        address = input('Address: ')
+        bankus.add_customer(first_name, surname, address)
+        del first_name                  #these del statements were put in here to prevent potential unintended
+        del surname                     #interactions from occuring and then it taking forever to find the cause.
+
+    def bank_interest_menu():
+        os.system('clear')
+        print('Bankus Interest\n\n')
+        bankus.interest()
+        print()
+        selection = input("Go Back: ")
+
+    def bank_capital_menu():
+        os.system('clear')
+        print("Bankus Capital\n\n")
+        print(f'Capital: ${bankus.capital()}\n')
+        selection = input("Go Back: ")
+
+    def add_account_menu():
+        os.system('clear')
+        print('Add Acount\n\n')
+        bankus.list_customers()     #lists customers
+        print()
+        while True:                 #User selects customer to create account for
+            try:
+                selection = int(input("Which customer do you want to create the account for? "))
+                if selection == len(bankus.customer_list):
+                    break
+            except ValueError:
+                print('Please enter a valid customer choice')
+            except IndexError:
+                print('Please enter a valid customer choice')
+        print("1. Basic Account")
+        print("2. Loyalty Saver")
+        print("3. Mortgage")
+        account_type = int(input("Choose account type: "))
+        balance = float(input('Input balance: '))
+        bankus.customers[selection - 1].add_account(account_type, balance)
+    
+    def customer_change_name_menu():
+        os.system("clear")
+        print("Change Customer Name\n\n")
+        bankus.list_customers()
+        print()
+        selection = int(input("Which customer would you like to change? "))
+        new_first_name = input("Input new first name: ")
+        new_surname = input("Input new surname: ")
+        bankus.customers[selection - 1].change_name(new_first_name, new_surname)
+
+    def customer_change_address_menu():
+        os.system("clear")
+        print("Change Customer Address")
+        bankus.list_customers()
+        print()
+        selection = int(input("Which customer would you like to change? "))
+        new_address = input("Input new address: ")
+        bankus.customers[selection - 1].change_address(new_address)
+    
+    def customer_check_interest_menu():
+        os.system("clear")
+        print("Check Customer Interest\n\n")
+        bankus.list_customers()                
+        print()
+        selection = int(input('Select a Customer: '))
+        bankus.customers[selection - 1].total_interest()
+        selection = input("Go Back: ")
+    
+    def list_of_customers_menu():
+        os.system('clear')
+        print('List of Customers\n\n')
+        bankus.list_customers()
+        print()
+        selection = input('Go Back: ')
+    
+    def check_balance_menu():
+        pass
+    
+    def withdraw_menu():
+        os.system('clear')
+        print('Withdraw\n\n')       #When there's no accounts it dies :(
+        bankus.list_customers()                
+        print()
+        selection = int(input('Select a customer: '))
+        i = 1
+        customer = bankus.customers[selection-1]
+        for account in customer.accounts:
+            print(f'{i}. {account}')
+            i += 1
+        selection = int(input('Select an account: '))
+        amount = float(input("Select amount to withdraw: "))
+        customer.accounts[selection - 1].withdraw(amount)
+        selection = input("Go Back: ")
+
+    def deposit_menu():
+        os.system('clear')
+        print("Deposit")
+        bankus.list_customers()                
+        print()
+        selection = int(input('Select a customer: '))
+        customer = bankus.customers[selection - 1]
+        i = 0
+        for account in customer.accounts:
+            print(f'{i}. {account}')
+            i += 1
+        selection = int(input('Select an account: '))
+        amount  = float(input("Select amount to deposit: "))
+        customer.accounts[selection - 1].deposit(amount)
+        selection = input("Go Back: ")
+
+    def account_interest_menu():
+        os.systen('clear')
+        print('Interest')
+        bankus.list_customers()
+        print()
+        selection = int(input('Select a customer: '))
+        customer = bankus.customers[selection - 1]
+        i = 0
+        for account in customer.accounts:
+            print(f'{i}. {account}')
+            i += 1
+        selection = int(input('Select an account: '))  
+        customer.accounts[selection - 1].interest()
+        selection = input("Go Back: ")
+        
+
+
+
+
+                
+        
+
+
+
+    
+
+class TestProgram:
     def test_add_customer():
         bankus.add_customer("John", "Doe", "123 High Street")
         bankus.customers[-1]

@@ -1,177 +1,19 @@
 import pickle
 import time
 import os
-
-class Bank:
-    def __init__(self,name):
-        self.name = name
-        self.customers = []         #list of customers allows the bank to "own" customers and 
-        self.bank_capital = 1000000
-    
-    def add_customer(self, customer):
-        self.customers.append(customer)     #Appends customers to the list of customers "owned" by the bank
-    
-    def interest(self):                     #I MESSED THIS UP IMMA HAVE TO FULLY REDO
-        new_capital = 0
-        for customer in self.customers:     #iterates through the customer's accounts
-            for account in customer.accounts:               #calculates interest for each account of each customer
-                new_capital += (account.balance*(1+account.interest/12)**12)
-        new_capital += self.bank_capital
-        print(f'Original capital: ${self.capital()}')           #prints the capital of the bank
-        print(f'Capital next annum: ${new_capital}')            #capital post interest in 12 months
-        print(f'Interest accrewed: ${self.capital() - new_capital}')            #amount of interest over the next 12 months
-
-    def __repr__(self):
-        return f'Bank(name={self.name}, customers={self.customers})'
-
-    def capital(self):                                              #returns the bank's capital
-        return self.bank_capital   
-        
-    def list_customers(self):                                       #iterates through the customer list and prints their first
-        i = 0                                                       #and surname along with its place in the list
-        for customer in self.customers:
-            print(f"{i+1}. {getattr(customer, "first_name")} {getattr(customer,"surname")}")
-            i += 1
-    
-    def save_state(self, filename):                                 #Saves the program state in a .pkl file
-       with open(filename, 'wb') as file:
-          pickle.dump(self, file)
-    
-    @staticmethod
-    def load_state(filename):                                        #loads the program state from the .pkl 
-       with open(filename, 'rb') as file:
-           return pickle.load(file)
-    
-
-class BasicAccount:                                #The base Account class that methods are inherited from
-    def __init__(self, balance):
-        self.interest = 0.02
-        self.balance = balance
-        self.max_transactions = 2
-        self.can_withdraw = True
-        self.account_type = 'Basic'
-    
-    def error_messages(self):
-        if self.max_transactions <= 0:                                          #error messages concerning account transactions
-            print("Sorry! You've reached the action limit on this account.")
-            print("Please restart the session to reset this limit")
-        if self.can_withdraw == False:
-            print("Sorry! You cannot withdraw from this account")
-        if self.balance <= 0:
-            print(f"Your balance is {self.balance}")
-            print('balance is in the negative')
-            print('')
-        if bankus.bank_capital < -1000000:
-            print("Bank Capital cannot be below -$1,000,000")
-            print("Please withdraw from an account to increase the bank capital")
-
-    def withdraw(self, amount):                                                #Withdraw from account
-        if self.can_withdraw == True and self.max_transactions > 0:
-            self.balance = self.balance - amount
-            self.max_transactions -= 1
-            print(f'You have withdrawn ${amount}')
-            print(f"Your new balance is ${self.balance}")
-            bankus.bank_capital += amount
-        else:
-            self.error_messages()
-    
-    def deposit(self, amount):                                  #deposit money into the account
-        if self.max_transactions > 0 and bankus.bank_capital > -1000000:
-            self.balance += amount                              
-            self.max_transactions -= 1
-            print(f"Your new balance is ${self.balance}")
-            bankus.bank_capital -= amount
-        else:
-            self.error_messages()
-    
-    def calculate_interest(self):                                   #Calculates interest for this account over the past 
-        interest = self.balance*(1 + self.interest / 12)**12        #Interest formula
-        print(f'Balance after interest this annum: ${interest}') 
-        print(f'Interest accrewed: ${interest - self.balance}')
-        return interest
-    
-    def Balance(self):                  #Returns Balance
-        return self.balance()
-
-    def __repr__(self):
-        return f'Account(account_type={self.account_type}, balance={self.balance}), interest={self.interest}, max_transactions={self.max_transactions}, can_withdraw={self.can_withdraw}' #returns transactions left instead of max transactions
-    
-
-class MortgageAccount(BasicAccount):        #Mortgage Bank Account
-    def __init__(self, balance):
-        self.account_type = 'Mortgage'
-        #self.mortgage = mortgage
-        self.interest = 0.045
-        self.balance = balance
-        self.can_withdraw = False
-        self.max_transactions = "unlimited"
-
-class LoyaltySaverAccount(BasicAccount):       #Loyalty Saver
-    def __init__(self, balance):
-        self.account_type = 'LoyaltySaver'
-        self.interest = 0.03
-        self.balance = balance
-        self.max_transactions = 5
-        self.can_withdraw = True
-    
-class Customer:
-    def __init__(self, first_name, surname, address):
-        self.first_name = first_name
-        self.compound_interest = 0
-        self.surname = surname
-        self.address = address
-        self.accounts = []                                  #Array that allows customers to "own" accounts
-        self.customer_capital = 0 
-
-    def __repr__(self):
-        return f'Customer(first_name={self.first_name}, surname={self.surname}, address={self.address}, accounts={self.accounts})'
-
-    def add_account(self, account):                         #Appends account to accounts list
-        self.accounts.append(account)
-    
-    def change_name(self):
-        new_first_name = input('Input new first name: ')                        #new first name and last name to be updated
-        new_surname = input('Input new surname: ')
-        print(f"Name has been changed from {self.first_name} {self.surname}")      #print original name
-        print(f"Name has been changed to {new_first_name} {new_surname}")          #print new name
-        self.first_name = new_first_name                                           #update first name
-        self.surname = new_surname                                                 #update last name
-    
-    def change_address(self):
-        address = input("Input new address: ")                                     #new address
-        print(f'Address has been changed from {self.address}')                     #print old address      
-        print(f"Address has been changed to {address}")                            #print new address
-        self.address = address                                                     #update address
-    
-    def total_balance(self):
-        self.customer_capital = 0
-        for account in self.accounts:                                             #iterates through a customers accounts
-            self.customer_capital += getattr(account, "balance")                  #adds the account balance to the customers total balance
-        return self.customer_capital
-    
-    def total_interest(self):
-        for account in self.accounts:                                             #Iterates through accounts
-            self.compound_interest += account.calculate_interest()                #Calculates the interest for each account and adds it to customer's total interest
-        print(self.compound_interest)
-    
-    def list_accounts(self):
-        i = 0
-        for account in self.accounts:              #iterates through accounts list and prints
-            print(f"{i+1}. {account}")
-            i += 1
+import classes
 
 try: 
-    bankus = Bank.load_state("Bankus.pkl")         #loads the bankus save file
+    bankus = classes.Bank.load_state("Bankus.pkl")         #loads the bankus save file
 except:
     print('No bank file present')                  #If no file present, creates a new bank instance
     print('Creating empty bank.')
     time.sleep(5)
     os.system('clear')
-    bankus = Bank("Bankus")
+    bankus = classes.Bank("Bankus")
 
-customer_list = []               #array that allows customers to be dynamically created before appending to the bank class
-account_list = []                #array that allows customers to be dynamically created before appending to the customer class
-i = 0                            #this prolly does nothing
+
+i = 0                         
 os.system('clear')
 
 while True:                     #keeps the loop going until the user wants to exit
@@ -216,7 +58,7 @@ while True:                     #keeps the loop going until the user wants to ex
                 address = input('Address: ')
                 fullname = first_name + surname
                 customer_list.append(fullname)
-                customer_list[-1] = Customer(first_name, surname, address)
+                customer_list[-1] = classes.Customer(first_name, surname, address)
                 bankus.add_customer(customer_list[-1])
                 bankus.__repr__()
                 del first_name                  #these del statements were put in here to prevent potential unintended
