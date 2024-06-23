@@ -221,16 +221,39 @@ class UI:
         print("1. Basic Account")
         print("2. Loyalty Saver")
         print("3. Mortgage")
-        account_type = int(input("Choose account type: "))
+
+        while True:
+            try:
+                account_type = int(input("Choose account type: "))
+            except ValueError:
+                print('Please input an integer (1-3)')
+            if 1 <= account_type <= 3:
+                break
+            print('Please input a valid account type (1-3)')
+
         balance = float(input('Input balance: '))
         bankus.customers[selection - 1].add_account(account_type, balance)
     
     def customer_change_name_menu():
         os.system("clear")
         print("Change Customer Name\n\n")
+        if len(bankus.customers) == 0 or None:
+            print('There are no customers in the bank to change.')
+            selection = input('Go Back: ')
+            return
+        
         bankus.list_customers()
         print()
-        selection = int(input("Which customer would you like to change? "))
+        while True:
+            try: 
+                selection = int(input("Which customer would you like to change? "))
+                if 0 < selection <= len(bankus.customers):
+                    break
+                else: 
+                    print('select a valid customer')
+            except ValueError:
+                print('Please input as an integer')
+    
         new_first_name = input("Input new first name: ")
         new_surname = input("Input new surname: ")
         bankus.customers[selection - 1].change_name(new_first_name, new_surname)
@@ -240,7 +263,15 @@ class UI:
         print("Change Customer Address")
         bankus.list_customers()
         print()
-        selection = int(input("Which customer would you like to change? "))
+        while True:
+            try:
+                selection = int(input("Which customer would you like to change? "))
+                if 0 < selection <= len(bankus.customers):
+                    break
+                else:
+                    print('Please Select a valid customer')
+            except ValueError:
+                print('Please input as an integer')    
         new_address = input("Input new address: ")
         bankus.customers[selection - 1].change_address(new_address)
     
@@ -249,7 +280,15 @@ class UI:
         print("Check Customer Interest\n\n")
         bankus.list_customers()                
         print()
-        selection = int(input('Select a Customer: '))
+        while True:
+            try:
+                selection = int(input('Select a Customer: '))
+                if 0 < selection <= len(bankus.customers):
+                    break
+                else:
+                    print('Please Select a valid customer')
+            except ValueError:
+                print('Please input as an integer') 
         bankus.customers[selection - 1].total_interest()
         selection = input("Go Back: ")
     
@@ -265,13 +304,29 @@ class UI:
         print('Check Account Balance\n\n')
         bankus.list_customers()
         print()
-        selection = int(input('Select a customer: '))
+        while True:
+            try:
+                selection = int(input('Select a customer: '))
+                if 0 < selection <= len(bankus.customers):
+                    break
+                else:
+                    print('Please Select a valid customer')
+            except ValueError:
+                print('Please input as an integer') 
         i=1
         customer = bankus.customers[selection-1]
         for account in customer.accounts:
             print(f'{i}. {account.account_name}')
             i+= 1
-        selection = int(input('Select an account: '))
+        while True:
+            try:
+                selection = int(input('Select an account: '))
+                if 0 < selection <= len(customer.accounts):
+                    break
+                else:
+                    print('Please Select a valid account')
+            except ValueError:
+                print('Please input as an integer') 
         customer.accounts[selection - 1].Balance()
         selection = input('Go Back: ')
 
@@ -280,14 +335,36 @@ class UI:
         print('Withdraw\n\n')       #When there's no accounts it dies :(
         bankus.list_customers()                
         print()
-        selection = int(input('Select a customer: '))
+        while True:
+            try:
+                selection = int(input('Select a customer: '))
+                if 0 < selection <= len(bankus.customers):
+                    break
+                else:
+                    print('Please Select a valid customer')
+            except ValueError:
+                print('Please input as an integer') 
         i = 1
         customer = bankus.customers[selection-1]
         for account in customer.accounts:
             print(f'{i}. {account}')
             i += 1
-        selection = int(input('Select an account: '))
-        amount = float(input("Select amount to withdraw: "))
+        while True:
+            try:
+                selection = int(input('Select an account: '))
+                if 0 < selection <= len(customer.accounts):
+                    break
+                else:
+                    print('Please Select a valid account')
+            except ValueError:
+                print('Please input as an integer') 
+        while True:
+            try:
+                amount = float(input("Select amount to withdraw: "))
+                if amount == float:
+                    break
+            except ValueError: 
+                print('Please input a valid float')
         customer.accounts[selection - 1].withdraw(amount)
         selection = input("Go Back: ")
 
@@ -296,14 +373,34 @@ class UI:
         print("Deposit")
         bankus.list_customers()                
         print()
-        selection = int(input('Select a customer: '))
+        while True:
+            try:
+                selection = int(input('Select a customer: '))
+                if 0 < selection <= len(bankus.customers):
+                    break
+                else:
+                    print('Please Select a valid customer')
+            except ValueError:
+                print('Please input as an integer') 
         customer = bankus.customers[selection - 1]
         i = 0
         for account in customer.accounts:
             print(f'{i}. {account}')
             i += 1
-        selection = int(input('Select an account: '))
-        amount  = float(input("Select amount to deposit: "))
+        while True:
+            try:
+                selection = int(input('Select an account: '))
+                if 0 < selection <= len(customer.accounts):
+                    break
+            except ValueError:
+                print('Please input as an integer')
+        while True:
+            try:
+                amount  = float(input("Select amount to deposit: "))
+                if amount == float:
+                    break
+            except ValueError:
+                print('Please input as float')
         customer.accounts[selection - 1].deposit(amount)
         selection = input("Go Back: ")
 
@@ -312,13 +409,27 @@ class UI:
         print('Interest')
         bankus.list_customers()
         print()
-        selection = int(input('Select a customer: '))
+        while True:
+            try:
+                selection = int(input('Select a customer: '))
+                if 0 < selection <= len(bankus.customers):
+                    break
+                else:
+                    print('Please Select a valid customer')
+            except ValueError:
+                print('Please input as an integer') 
         customer = bankus.customers[selection - 1]
         i = 0
         for account in customer.accounts:
             print(f'{i}. {account}')
             i += 1
-        selection = int(input('Select an account: '))  
+        while True:
+            try:
+                selection = int(input('Select an account: '))  
+                if 0 < selection <= len(customer.accounts):
+                    break
+            except ValueError:
+                print('Please input as an integer')
         customer.accounts[selection - 1].interest()
         selection = input("Go Back: ")
         
@@ -360,7 +471,6 @@ class TestProgram:
         except AssertionError:
             print("Bank interest: Test Failed")
 
-    
     def test_bank_capital():
         try:
             assert bankus.capital() == bankus.bank_capital 
@@ -391,7 +501,6 @@ class TestProgram:
             print("Balance: Test Failed")
         del bankus.customers[-1]
         
-
     def test_change_name(firstName, last_name):
         bankus.add_customer(firstName, last_name, "123 High Street")
         bankus.customers[-1].change_name("Humpty", "Dumpty")

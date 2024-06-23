@@ -1,5 +1,3 @@
-import pickle
-import time
 import os
 from classes import *
 
@@ -49,7 +47,7 @@ while True:                     #keeps the loop going until the user wants to ex
                 UI.bank_capital_menu()
             
             if selection == 4:
-                pass
+                print(bankus)
 
             if selection == 5:                  #Exit Bank Settings
                 os.system('clear')
