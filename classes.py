@@ -1,5 +1,6 @@
 import pickle
 import os
+import time
 
 class Bank:
     def __init__(self,name):
@@ -19,9 +20,9 @@ class Bank:
             for account in customer.accounts:               #calculates interest for each account of each customer
                 new_capital += (account.balance*(1+account.interest/12)**12)
         new_capital += self.bank_capital
-        print(f'Original capital: ${self.capital()}')           #prints the capital of the bank
+        print(f'Original capital: ${self.bank_capital}')           #prints the capital of the bank
         print(f'Capital next annum: ${new_capital}')            #capital post interest in 12 months
-        print(f'Interest accrewed: ${self.capital() - new_capital}')            #amount of interest over the next 12 months
+        print(f'Interest accrewed: ${self.bank_capital - new_capital}')            #amount of interest over the next 12 months
 
     def __repr__(self):
         return f'Bank(name={self.name}, customers={self.customers})'
@@ -34,7 +35,7 @@ class Bank:
     def list_customers(self):                                       #iterates through the customer list and prints their first
         i = 0                                                       #and surname along with its place in the list
         for customer in self.customers:
-            print(f"{i+1}. {getattr(customer, "first_name")} {getattr(customer,"surname")}")
+            print(f"{i+1}. {customer.first_name} {customer.surname}")
             i += 1
     
     def save_state(self, filename):                                 #Saves the program state in a .pkl file
@@ -47,7 +48,8 @@ class Bank:
            return pickle.load(file)
 
 class BasicAccount:                                #The base Account class that methods are inherited from
-    def __init__(self, balance):
+    def __init__(self, balance, account_name):
+        self.account_name = account_name
         self.interest = 0.02
         self.balance = balance
         self.max_transactions = 2
@@ -91,12 +93,13 @@ class BasicAccount:                                #The base Account class that 
         else:
             self.error_messages()
     
-    def Interest(self):                                   #Calculates interest for this account over the past 
+    def Interest(self, skip_print):                                   #Calculates interest for this account over the past 
         interest = self.balance*(1 + self.interest / 12)**12        #Interest formula
+        if skip_print == True:
+            return interest
         print(f'Balance after interest this annum: ${interest}') 
         print(f'Interest accrewed: ${interest - self.balance}')
         
-    
     def Balance(self):                  #Returns Balance
        print(f'${self.balance}')
 
@@ -104,7 +107,8 @@ class BasicAccount:                                #The base Account class that 
         return f'Account(account_type={self.account_type}, balance={self.balance}), interest={self.interest}, max_transactions={self.max_transactions}, can_withdraw={self.can_withdraw}' #returns transactions left instead of max transactions
     
 class MortgageAccount(BasicAccount):        #Mortgage Bank Account
-    def __init__(self, balance):
+    def __init__(self, balance, account_name):
+        self.account_name = account_name
         self.account_type = 'Mortgage'
         self.interest = 0.045
         self.balance = balance
@@ -112,7 +116,8 @@ class MortgageAccount(BasicAccount):        #Mortgage Bank Account
         self.max_transactions = 1
 
 class LoyaltySaverAccount(BasicAccount):       #Loyalty Saver
-    def __init__(self, balance):
+    def __init__(self, balance, account_name):
+        self.account_name = account_name
         self.account_type = 'LoyaltySaver'
         self.interest = 0.03
         self.balance = balance
@@ -136,14 +141,14 @@ class Customer:
         accounts = self.accounts
         for account in self.accounts:
             count += 1
-        account_placeholder = self.first_name + self.surname
-        accounts.append(account_placeholder)
+        account_name = f"{self.first_name}{self.surname}{count}"
+        accounts.append(account_name)                                   #something needs to be in the list as a placeholder
         if account_type == 1:                                           #sets the type of account        
-            accounts[count] = BasicAccount(balance)
+            accounts[count] = BasicAccount(balance, account_name)
         if account_type == 2:
-            accounts[count] = LoyaltySaverAccount(balance)
+            accounts[count] = LoyaltySaverAccount(balance, account_name)
         if account_type == 3: 
-            accounts[count] = MortgageAccount(balance)
+            accounts[count] = MortgageAccount(balance, account_name)
         
     def change_name(self, new_first_name, new_surname):
         if __name__ != "__main__":
@@ -166,7 +171,7 @@ class Customer:
     
     def total_interest(self):
         for account in self.accounts:                                             #Iterates through accounts
-            self.compound_interest += account.calculate_interest()                #Calculates the interest for each account and adds it to customer's total interest
+            self.compound_interest += account.Interest(True)                #Calculates the interest for each account and adds it to customer's total interest
         print(self.compound_interest)
     
     def list_accounts(self):
@@ -196,7 +201,7 @@ class UI:
     def bank_capital_menu():
         os.system('clear')
         print("Bankus Capital\n\n")
-        print(f'Capital: ${bankus.capital()}\n')
+        bankus.capital()
         selection = input("Go Back: ")
 
     def add_account_menu():
@@ -207,7 +212,7 @@ class UI:
         while True:                 #User selects customer to create account for
             try:
                 selection = int(input("Which customer do you want to create the account for? "))
-                if selection == len(bankus.customer_list):
+                if selection == len(bankus.customers):
                     break
             except ValueError:
                 print('Please enter a valid customer choice')
@@ -256,8 +261,20 @@ class UI:
         selection = input('Go Back: ')
     
     def check_balance_menu():
-        pass
-    
+        os.system('clear')
+        print('Check Account Balance\n\n')
+        bankus.list_customers()
+        print()
+        selection = int(input('Select a customer: '))
+        i=1
+        customer = bankus.customers[selection-1]
+        for account in customer.accounts:
+            print(f'{i}. {account.account_name}')
+            i+= 1
+        selection = int(input('Select an account: '))
+        customer.accounts[selection - 1].Balance()
+        selection = input('Go Back: ')
+
     def withdraw_menu():
         os.system('clear')
         print('Withdraw\n\n')       #When there's no accounts it dies :(
@@ -305,17 +322,6 @@ class UI:
         customer.accounts[selection - 1].interest()
         selection = input("Go Back: ")
         
-
-
-
-
-                
-        
-
-
-
-    
-
 class TestProgram:
     def test_add_customer():
         bankus.add_customer("John", "Doe", "123 High Street")
@@ -480,3 +486,12 @@ if __name__ == "__main__":
     TestProgram.test_deposit()
     print(bankus.bank_capital)   #reset bankus' balance
     TestProgram.test_balance()
+
+try: 
+    bankus = Bank.load_state("Bankus.pkl")         #loads the bankus save file
+except:
+    print('No bank file present')                  #If no file present, creates a new bank instance
+    print('Creating empty bank.')
+    time.sleep(5)
+    os.system('clear')
+    bankus = Bank("Bankus")
