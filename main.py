@@ -18,7 +18,6 @@ while True:                     #keeps the loop going until the user wants to ex
         except ValueError:
             print("Please input a valid selection (1-5)\n")
     
-    
     if selection == 1:                          #Bank Options
         while True:  
             os.system("clear")

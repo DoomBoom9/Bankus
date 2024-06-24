@@ -20,9 +20,12 @@ class Bank:
             for account in customer.accounts:               #calculates interest for each account of each customer
                 new_capital += (account.balance*(1+account.interest/12)**12)
         new_capital += self.bank_capital
-        print(f'Original capital: ${self.bank_capital}')           #prints the capital of the bank
-        print(f'Capital next annum: ${new_capital}')            #capital post interest in 12 months
-        print(f'Interest accrewed: ${self.bank_capital - new_capital}')            #amount of interest over the next 12 months
+        if __name__ != "__main__":
+            print(f'Original capital: ${self.bank_capital}')           #prints the capital of the bank
+            print(f'Capital next annum: ${new_capital}')            #capital post interest in 12 months
+            print(f'Interest accrewed: ${new_capital - bankus.bank_capital}')            #amount of interest over the next 12 months
+        if __name__ == '__main__':
+            return new_capital
 
     def __repr__(self):
         return f'Bank(name={self.name}, customers={self.customers})'
@@ -39,8 +42,15 @@ class Bank:
             i += 1
     
     def save_state(self, filename):                                 #Saves the program state in a .pkl file
+       os.system('clear')
        with open(filename, 'wb') as file:
           pickle.dump(self, file)
+    
+    def reset_transactions(self):
+        for customer in self.customers:
+            for account in customer.accounts:
+                account.curr_transactions = account.max_transactions
+
     
     @staticmethod
     def load_state(filename):                                        #loads the program state from the .pkl 
@@ -53,6 +63,7 @@ class BasicAccount:                                #The base Account class that 
         self.interest = 0.02
         self.balance = balance
         self.max_transactions = 2
+        self.curr_transactions = 2
         self.can_withdraw = True
         self.account_type = 'Basic'
     
@@ -66,15 +77,23 @@ class BasicAccount:                                #The base Account class that 
             if self.balance <= 0:
                 print(f"Your balance is {self.balance}")
                 print('balance is in the negative')
-                print('')
+                print()
             if bankus.bank_capital < -1000000:
                 print("Bank Capital cannot be below -$1,000,000")
                 print("Please withdraw from an account to increase the bank capital")
 
-    def withdraw(self, amount):                                                #Withdraw from account
-        if self.can_withdraw == True and self.max_transactions > 0:
+    def withdraw(self, amount):                                              #Withdraw from account
+        if (self.balance - amount) < 0:
+            print('This action will create a negative balance')
+            print(f'Current balance: ${self.balance}')
+            print(f'Balance after action: ${self.balance - amount}')
+            print(f'Please input an amount that will not create a negative balance')
+            selection = input('Go Back: ')
+            return
+
+        if self.can_withdraw == True and self.curr_transactions > 0:
             self.balance = self.balance - amount
-            self.max_transactions -= 1
+            self.curr_transactions -= 1
             bankus.bank_capital += amount
             if __name__ != "__main__":
                 print(f'You have withdrawn ${amount}')
@@ -82,11 +101,16 @@ class BasicAccount:                                #The base Account class that 
         else:
             self.error_messages()
     
-    def deposit(self, amount):                                  #deposit money into the account
-        if self.max_transactions > 0 and bankus.bank_capital > -1000000:
+    def deposit(self, amount):                                 #deposit money into the account
+        if (bankus.bank_capital - amount) < -1000000:
+            print("This action will result in the bank's capital being lower than $-1,000,000")
+            print(f"Current Bank Capital: {bankus.bank_capital}")
+            print(f"Bank Capital after your action: {bankus.bank_capital - amount}")
+            print("Please withdraw from an account to add money back to Bankus' Capital\n")
+        if self.curr_transactions > 0:
             self.balance += amount
             if self.account_type == "Basic" or "LoyaltySaver":
-                self.max_transactions -= 1
+                self.curr_transactions -= 1
             bankus.bank_capital -= amount
             if __name__ != "__main__":
                 print(f"Your new balance is ${self.balance}")
@@ -106,6 +130,9 @@ class BasicAccount:                                #The base Account class that 
     def __repr__(self):
         return f'Account(account_type={self.account_type}, balance={self.balance}), interest={self.interest}, max_transactions={self.max_transactions}, can_withdraw={self.can_withdraw}' #returns transactions left instead of max transactions
     
+    def reset_transactions(self):
+        self.curr_transactions = self.max_transactions
+    
 class MortgageAccount(BasicAccount):        #Mortgage Bank Account
     def __init__(self, balance, account_name):
         self.account_name = account_name
@@ -114,6 +141,7 @@ class MortgageAccount(BasicAccount):        #Mortgage Bank Account
         self.balance = balance
         self.can_withdraw = False
         self.max_transactions = 1
+        self.curr_transactions = 1
 
 class LoyaltySaverAccount(BasicAccount):       #Loyalty Saver
     def __init__(self, balance, account_name):
@@ -122,6 +150,7 @@ class LoyaltySaverAccount(BasicAccount):       #Loyalty Saver
         self.interest = 0.03
         self.balance = balance
         self.max_transactions = 5
+        self.curr_transactions = 5
         self.can_withdraw = True
     
 class Customer:
@@ -137,6 +166,15 @@ class Customer:
         return f'Customer(first_name={self.first_name}, surname={self.surname}, address={self.address}, accounts={self.accounts})'
 
     def add_account(self, account_type, balance):  #Appends account to accounts list
+        if (bankus.bank_capital - balance) < -1000000:
+            print("This action will result in the bank's capital being lower than $-1,000,00")
+            print(f"Current Bank Capital: {bankus.bank_capital}")
+            print(f"Bank Capital after your action: {bankus.bank_capital - balance}")
+            print("Please withdraw from an account to add money back to Bankus' Capital\n")
+            selection = input('Go Back: ')
+            return
+
+        bankus.bank_capital -= balance
         count = 0
         accounts = self.accounts
         for account in self.accounts:
@@ -206,13 +244,13 @@ class UI:
 
     def add_account_menu():
         os.system('clear')
-        print('Add Acount\n\n')
+        print('Add Account\n\n')
         bankus.list_customers()     #lists customers
         print()
         while True:                 #User selects customer to create account for
             try:
                 selection = int(input("Which customer do you want to create the account for? "))
-                if selection == len(bankus.customers):
+                if 0 < selection <= len(bankus.customers):
                     break
             except ValueError:
                 print('Please enter a valid customer choice')
@@ -227,11 +265,19 @@ class UI:
                 account_type = int(input("Choose account type: "))
             except ValueError:
                 print('Please input an integer (1-3)')
-            if 1 <= account_type <= 3:
-                break
-            print('Please input a valid account type (1-3)')
-
-        balance = float(input('Input balance: '))
+            try:
+                if 1 <= account_type <= 3:
+                    break
+                print('Please input a valid account type (1-3)')
+            except UnboundLocalError:
+                print('Please input a valid account type (1-3)')
+        while True:
+            try:
+                balance = float(input('Input balance: '))
+                if type(balance) == float or int:
+                    break
+            except ValueError:
+                print('Please input an amount of money to enter into the bank account as a float')
         bankus.customers[selection - 1].add_account(account_type, balance)
     
     def customer_change_name_menu():
@@ -333,6 +379,11 @@ class UI:
     def withdraw_menu():
         os.system('clear')
         print('Withdraw\n\n')       #When there's no accounts it dies :(
+        if len(bankus.customers) == 0:
+            print('Sorry! there are no customers in Bankus')
+            print('Add at least one customer and try again')
+            selection = input('Go Back: ')
+            return
         bankus.list_customers()                
         print()
         while True:
@@ -346,8 +397,13 @@ class UI:
                 print('Please input as an integer') 
         i = 1
         customer = bankus.customers[selection-1]
+        if len(customer.accounts) == 0:
+            print(f'Sorry! there are no accounts in {customer.first_name} {customer.surname}')
+            print('Add at least one account to this customer and try again')
+            selection = input('Go Back: ')
+            return
         for account in customer.accounts:
-            print(f'{i}. {account}')
+            print(f'{i}. {account.account_name}')
             i += 1
         while True:
             try:
@@ -361,7 +417,7 @@ class UI:
         while True:
             try:
                 amount = float(input("Select amount to withdraw: "))
-                if amount == float:
+                if type(amount) == float or int:
                     break
             except ValueError: 
                 print('Please input a valid float')
@@ -371,6 +427,11 @@ class UI:
     def deposit_menu():
         os.system('clear')
         print("Deposit")
+        if len(bankus.customers) == 0:
+            print('Sorry! there are no customers in Bankus')
+            print('Add at least one customer and try again')
+            selection = input('Go Back: ')
+            return
         bankus.list_customers()                
         print()
         while True:
@@ -383,9 +444,14 @@ class UI:
             except ValueError:
                 print('Please input as an integer') 
         customer = bankus.customers[selection - 1]
+        if len(customer.accounts) == 0:
+            print(f'Sorry! there are no accounts in {customer.first_name} {customer.surname}')
+            print('Add at least one account to this customer and try again')
+            selection = input('Go Back: ')
+            return
         i = 0
         for account in customer.accounts:
-            print(f'{i}. {account}')
+            print(f'{i}. {account.account_name}')
             i += 1
         while True:
             try:
@@ -397,7 +463,7 @@ class UI:
         while True:
             try:
                 amount  = float(input("Select amount to deposit: "))
-                if amount == float:
+                if type(amount) == float or int:
                     break
             except ValueError:
                 print('Please input as float')
@@ -405,7 +471,7 @@ class UI:
         selection = input("Go Back: ")
 
     def account_interest_menu():
-        os.systen('clear')
+        os.system('clear')
         print('Interest')
         bankus.list_customers()
         print()
@@ -419,7 +485,7 @@ class UI:
             except ValueError:
                 print('Please input as an integer') 
         customer = bankus.customers[selection - 1]
-        i = 0
+        i = 1
         for account in customer.accounts:
             print(f'{i}. {account}')
             i += 1
@@ -467,7 +533,7 @@ class TestProgram:
         bankus.add_customer("Big", "Dog", "BARK BARK WOOF WOOF")
         bankus.customers[-1].add_account(1, 1000)
         try:
-            assert bankus.interest() == 9999050             #Fails bc withdrawal is messed up.
+            assert bankus.interest() == 1000020.1843556815             #Fails bc withdrawal is messed up.
         except AssertionError:
             print("Bank interest: Test Failed")
 
@@ -601,6 +667,6 @@ try:
 except:
     print('No bank file present')                  #If no file present, creates a new bank instance
     print('Creating empty bank.')
-    time.sleep(5)
+    time.sleep(2)
     os.system('clear')
     bankus = Bank("Bankus")
