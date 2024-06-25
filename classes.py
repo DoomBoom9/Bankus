@@ -140,9 +140,7 @@ class BasicAccount:                                #The base Account class that 
 
     def __repr__(self):
         return f'Account(account_name = {self.account_name}, account_type={self.account_type}, balance={self.balance}), interest={self.interest}, max_transactions={self.max_transactions}, curr_transactions={self.curr_transactions}, can_withdraw={self.can_withdraw}' #returns transactions left instead of max transactions
-    
-    def reset_transactions(self): #resets all accounts transactions this session
-        self.curr_transactions = self.max_transactions
+
     
 class MortgageAccount(BasicAccount):        #Mortgage Bank Account
     def __init__(self, balance, account_name):
@@ -229,11 +227,6 @@ class Customer:
             self.compound_interest += account.Interest(True)                #Calculates the interest for each account and adds it to customer's total interest
         print(self.compound_interest)
     
-    def list_accounts(self):    #lists all accounts.
-        i = 0
-        for account in self.accounts:              #iterates through accounts list and prints
-            print(f"{i+1}. {account}")
-            i += 1
 
 class UI:
     def add_customer_menu():
