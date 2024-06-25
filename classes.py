@@ -177,15 +177,15 @@ class Customer:
         return f'Customer(first_name={self.first_name}, surname={self.surname}, address={self.address}, accounts={self.accounts})'
 
     def add_account(self, account_type, balance):  #Appends account to accounts list
-        if (bankus.bank_capital - balance) < -1000000:
+        if (bankus.bank_capital - balance) < -1000000:  #prevents bank capital from being lower than -1,000,000
             print("This action will result in the bank's capital being lower than $-1,000,000")
             print(f"Current Bank Capital: {bankus.bank_capital}")
             print(f"Bank Capital after your action: {bankus.bank_capital - balance}")
             print("Please withdraw from an account to add money back to Bankus' Capital\n")
-            selection = input('Go Back: ')
+            selection = input('Go Back: ')        #waits for user to input anything before returning to previous screen
             return
         
-        if balance < 0:
+        if balance < 0:                                     #stops user from adding negative balance to account
             print('You cannot have a negative balance')
             print('Please enter a positive amount')
             selection = input('Go Back: ')
@@ -205,7 +205,7 @@ class Customer:
         if account_type == 3: 
             accounts[count] = MortgageAccount(balance, account_name)
         
-    def change_name(self, new_first_name, new_surname):
+    def change_name(self, new_first_name, new_surname):             #changes name
         if __name__ != "__main__":
             print(f"Name has been changed from {self.first_name} {self.surname}")      #print original name
             print(f"Name has been changed to {new_first_name} {new_surname}")          #print new name
@@ -218,18 +218,18 @@ class Customer:
             print(f"Address has been changed to {new_address}")                            #print new address
         self.address = new_address                                                     #update address
     
-    def total_balance(self):
+    def total_balance(self):    #gets a customers balance accross all accounts
         self.customer_capital = 0
         for account in self.accounts:                                             #iterates through a customers accounts
             self.customer_capital += getattr(account, "balance")                  #adds the account balance to the customers total balance
         return self.customer_capital
     
-    def total_interest(self):
+    def total_interest(self):               #a customer's interest accross all accounts.
         for account in self.accounts:                                             #Iterates through accounts
             self.compound_interest += account.Interest(True)                #Calculates the interest for each account and adds it to customer's total interest
         print(self.compound_interest)
     
-    def list_accounts(self):
+    def list_accounts(self):    #lists all accounts.
         i = 0
         for account in self.accounts:              #iterates through accounts list and prints
             print(f"{i+1}. {account}")
@@ -506,7 +506,7 @@ class UI:
         customer = bankus.customers[selection - 1]
         i = 1
         for account in customer.accounts:
-            print(f'{i}. {account}')
+            print(f'{i}. {account.account_name}')
             i += 1
         while True:
             try:
@@ -515,7 +515,7 @@ class UI:
                     break
             except ValueError:
                 print('Please input as an integer')
-        customer.accounts[selection - 1].interest()
+        customer.accounts[selection - 1].Interest(False)
         selection = input("Go Back: ")
         
 class TestProgram:
@@ -667,8 +667,8 @@ if __name__ == "__main__":
     TestProgram.test_list_customers()
     TestProgram.test_save_state()
     TestProgram.test_load_state()
-    TestProgram.test_add_account() #fix the problem of bankus' balance not going doen
-    print(bankus.bank_capital)
+    TestProgram.test_add_account()
+   
 
     TestProgram.test_change_name("Marty", "Patricks")
     TestProgram.test_change_name(1, 2)
@@ -676,11 +676,11 @@ if __name__ == "__main__":
 
     TestProgram.test_change_address("123 Geraldine Crescent")
     TestProgram.test_withdraw()
-    print(bankus.bank_capital)   #reset bankus' balance
     TestProgram.test_deposit()
-    print(bankus.bank_capital)   #reset bankus' balance
     TestProgram.test_balance()
 
+
+# this is here so bankus exists
 try: 
     bankus = Bank.load_state("Bankus.pkl")         #loads the bankus save file
 except:

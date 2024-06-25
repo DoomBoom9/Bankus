@@ -2,7 +2,7 @@ import os
 from classes import *
 
 os.system('clear')
-bankus.reset_transactions()
+bankus.reset_transactions() #resets transactions
 
 while True:                     #keeps the loop going until the user wants to exit
     os.system('clear')
