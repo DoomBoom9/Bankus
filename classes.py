@@ -69,7 +69,7 @@ class BasicAccount:                                #The base Account class that 
     
     def error_messages(self):
         if __name__ != "__main__":
-            if self.max_transactions <= 0:                                         
+            if self.curr_transactions <= 0:                                         
                 print("Sorry! You've reached the action limit on this account.")
                 print("Please restart the session to reset this limit")
             if self.can_withdraw == False:
@@ -83,12 +83,16 @@ class BasicAccount:                                #The base Account class that 
                 print("Please withdraw from an account to increase the bank capital")
 
     def withdraw(self, amount):                                              #Withdraw from account
+        if amount < 0:
+            print('Please input a positive amount')
+            print('Negative money cannot be withdrawn')
+            return
+        
         if (self.balance - amount) < 0:
             print('This action will create a negative balance')
             print(f'Current balance: ${self.balance}')
             print(f'Balance after action: ${self.balance - amount}')
             print(f'Please input an amount that will not create a negative balance')
-            selection = input('Go Back: ')
             return
 
         if self.can_withdraw == True and self.curr_transactions > 0:
@@ -102,11 +106,18 @@ class BasicAccount:                                #The base Account class that 
             self.error_messages()
     
     def deposit(self, amount):                                 #deposit money into the account
+        if amount < 0:
+            print('Please input a positive amount')
+            print('Negative money cannot be deposited')
+            return
+        
         if (bankus.bank_capital - amount) < -1000000:
             print("This action will result in the bank's capital being lower than $-1,000,000")
             print(f"Current Bank Capital: {bankus.bank_capital}")
             print(f"Bank Capital after your action: {bankus.bank_capital - amount}")
             print("Please withdraw from an account to add money back to Bankus' Capital\n")
+            return
+        
         if self.curr_transactions > 0:
             self.balance += amount
             if self.account_type == "Basic" or "LoyaltySaver":
@@ -128,7 +139,7 @@ class BasicAccount:                                #The base Account class that 
        print(f'${self.balance}')
 
     def __repr__(self):
-        return f'Account(account_type={self.account_type}, balance={self.balance}), interest={self.interest}, max_transactions={self.max_transactions}, can_withdraw={self.can_withdraw}' #returns transactions left instead of max transactions
+        return f'Account(account_name = {self.account_name}, account_type={self.account_type}, balance={self.balance}), interest={self.interest}, max_transactions={self.max_transactions}, curr_transactions={self.curr_transactions}, can_withdraw={self.can_withdraw}' #returns transactions left instead of max transactions
     
     def reset_transactions(self):
         self.curr_transactions = self.max_transactions
@@ -171,6 +182,12 @@ class Customer:
             print(f"Current Bank Capital: {bankus.bank_capital}")
             print(f"Bank Capital after your action: {bankus.bank_capital - balance}")
             print("Please withdraw from an account to add money back to Bankus' Capital\n")
+            selection = input('Go Back: ')
+            return
+        
+        if balance < 0:
+            print('You cannot have a negative balance')
+            print('Please enter a positive amount')
             selection = input('Go Back: ')
             return
 
@@ -252,6 +269,8 @@ class UI:
                 selection = int(input("Which customer do you want to create the account for? "))
                 if 0 < selection <= len(bankus.customers):
                     break
+                if 0 > selection > len(bankus.customers):
+                    print('Please enter a valid customer choice')
             except ValueError:
                 print('Please enter a valid customer choice')
             except IndexError:
@@ -449,7 +468,7 @@ class UI:
             print('Add at least one account to this customer and try again')
             selection = input('Go Back: ')
             return
-        i = 0
+        i = 1
         for account in customer.accounts:
             print(f'{i}. {account.account_name}')
             i += 1

@@ -2,8 +2,10 @@ import os
 from classes import *
 
 os.system('clear')
+bankus.reset_transactions()
 
 while True:                     #keeps the loop going until the user wants to exit
+    os.system('clear')
     print("Bankus\n\n")
     print("1. Bank")
     print("2. Customer")
@@ -47,6 +49,7 @@ while True:                     #keeps the loop going until the user wants to ex
             
             if selection == 4:
                 print(bankus)
+                selection = input('Go Back: ')
 
             if selection == 5:                  #Exit Bank Settings
                 os.system('clear')
