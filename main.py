@@ -38,7 +38,7 @@ while True:                     #keeps the loop going until the user wants to ex
                 except ValueError:
                     print("Please input a valid selection (1-5)\n")
             
-            if selection == 1:
+            if selection == 1:                  #add customer
                 UI.add_customer_menu()
 
             if selection == 2:                  #Bank interest
@@ -47,7 +47,7 @@ while True:                     #keeps the loop going until the user wants to ex
             if selection == 3:                  #Bank Capital
                 UI.bank_capital_menu()
             
-            if selection == 4:
+            if selection == 4:                     #Bank status
                 print(bankus)
                 selection = input('Go Back: ')
 
@@ -79,10 +79,10 @@ while True:                     #keeps the loop going until the user wants to ex
             if selection == 1:              #Add Account
                 UI.add_account_menu()
 
-            if selection == 2:
+            if selection == 2:                  #change name
                 UI.customer_change_name_menu()
 
-            if selection == 3: 
+            if selection == 3:                      #change address
                 UI.customer_change_address_menu()
             
             if selection == 4:   #should probably be a part of bank
@@ -91,7 +91,7 @@ while True:                     #keeps the loop going until the user wants to ex
             if selection == 5:                              #this whole block looks like an eyesore in the terminal
                 UI.customer_check_interest_menu()
 
-            if selection == 6:
+            if selection == 6:                              #list customers
                 UI.list_of_customers_menu()
 
             if selection == 7:
@@ -116,16 +116,16 @@ while True:                     #keeps the loop going until the user wants to ex
                 except ValueError:
                     print("Please input a valid selection (1-5)\n")
             
-            if selection == 1:
+            if selection == 1:                  #check balance
                 UI.check_balance_menu()
                 
-            if selection == 2:              #This probably wont work as intended
+            if selection == 2:              #Withdraw from account
                 UI.withdraw_menu()
             
-            if selection == 3:              #this will probably shit itself as well
+            if selection == 3:              #deposit
                 UI.deposit_menu()
             
-            if selection == 4:                                              
+            if selection == 4:                #shows account interest                         
                 UI.account_interest_menu()
             
             if selection == 5:

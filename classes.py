@@ -14,7 +14,7 @@ class Bank:
         self.customers[-1] = Customer(first_name, surname, address)
         self.__repr__()  #Appends customers to the list of customers "owned" by the bank
     
-    def interest(self):                     #I MESSED THIS UP IMMA HAVE TO FULLY REDO
+    def interest(self):                     #get's all interest in the bank 
         new_capital = 0
         for customer in self.customers:     #iterates through the customer's accounts
             for account in customer.accounts:               #calculates interest for each account of each customer
@@ -46,7 +46,7 @@ class Bank:
        with open(filename, 'wb') as file:
           pickle.dump(self, file)
     
-    def reset_transactions(self):
+    def reset_transactions(self):                                   #resets account transactions when new session starts
         for customer in self.customers:
             for account in customer.accounts:
                 account.curr_transactions = account.max_transactions
@@ -67,51 +67,51 @@ class BasicAccount:                                #The base Account class that 
         self.can_withdraw = True
         self.account_type = 'Basic'
     
-    def error_messages(self):
+    def error_messages(self):                      #some repeated error messages
         if __name__ != "__main__":
-            if self.curr_transactions <= 0:                                         
+            if self.curr_transactions <= 0:        #if user has ran out of transactions on account                          
                 print("Sorry! You've reached the action limit on this account.")
                 print("Please restart the session to reset this limit")
-            if self.can_withdraw == False:
+            if self.can_withdraw == False:          #if it's a mortgage account
                 print("Sorry! You cannot withdraw from this account")
-            if self.balance <= 0:
+            if self.balance <= 0:                   #does not let balance dip below zero
                 print(f"Your balance is {self.balance}")
                 print('balance is in the negative')
                 print()
-            if bankus.bank_capital < -1000000:
+            if bankus.bank_capital < -1000000:      #does not let bank capital dip below -1,000,000
                 print("Bank Capital cannot be below -$1,000,000")
                 print("Please withdraw from an account to increase the bank capital")
 
     def withdraw(self, amount):                                              #Withdraw from account
-        if amount < 0:
+        if amount < 0:                                  #prevents negative money from being withdrawn 
             print('Please input a positive amount')
             print('Negative money cannot be withdrawn')
             return
         
-        if (self.balance - amount) < 0:
+        if (self.balance - amount) < 0:                         #prevents action from creating a negative balance
             print('This action will create a negative balance')
             print(f'Current balance: ${self.balance}')
             print(f'Balance after action: ${self.balance - amount}')
             print(f'Please input an amount that will not create a negative balance')
             return
 
-        if self.can_withdraw == True and self.curr_transactions > 0:
-            self.balance = self.balance - amount
-            self.curr_transactions -= 1
-            bankus.bank_capital += amount
-            if __name__ != "__main__":
+        if self.can_withdraw == True and self.curr_transactions > 0:    #makes sure the account is allowed to withdraw
+            self.balance = self.balance - amount                        #takes ammount off of balance
+            self.curr_transactions -= 1                                 #takes away a transaction from the current session
+            bankus.bank_capital += amount                               #adds amount out of account back to the bank's capital
+            if __name__ != "__main__":                                  #prevents the unit testing from printing things in terminal
                 print(f'You have withdrawn ${amount}')
                 print(f"Your new balance is ${self.balance}")
         else:
             self.error_messages()
     
     def deposit(self, amount):                                 #deposit money into the account
-        if amount < 0:
+        if amount < 0:                                         #prevents depositing negative money
             print('Please input a positive amount')
             print('Negative money cannot be deposited')
             return
         
-        if (bankus.bank_capital - amount) < -1000000:
+        if (bankus.bank_capital - amount) < -1000000:           #prevents bank capital from dipping below -1,000,000
             print("This action will result in the bank's capital being lower than $-1,000,000")
             print(f"Current Bank Capital: {bankus.bank_capital}")
             print(f"Bank Capital after your action: {bankus.bank_capital - amount}")
@@ -120,17 +120,17 @@ class BasicAccount:                                #The base Account class that 
         
         if self.curr_transactions > 0:
             self.balance += amount
-            if self.account_type == "Basic" or "LoyaltySaver":
+            if self.account_type == "Basic" or "LoyaltySaver": #takes away 1 from the transactions left if account is basic or saver
                 self.curr_transactions -= 1
             bankus.bank_capital -= amount
-            if __name__ != "__main__":
+            if __name__ != "__main__":  #prevents printing in terminal for unit testing
                 print(f"Your new balance is ${self.balance}")
         else:
             self.error_messages()
     
-    def Interest(self, skip_print):                                   #Calculates interest for this account over the past 
+    def Interest(self, skip_print):                                   #Calculates interest for the next year
         interest = self.balance*(1 + self.interest / 12)**12        #Interest formula
-        if skip_print == True:
+        if skip_print == True:                                      #allows unit testing to return the interest without printing the rest of the function
             return interest
         print(f'Balance after interest this annum: ${interest}') 
         print(f'Interest accrewed: ${interest - self.balance}')
@@ -141,7 +141,7 @@ class BasicAccount:                                #The base Account class that 
     def __repr__(self):
         return f'Account(account_name = {self.account_name}, account_type={self.account_type}, balance={self.balance}), interest={self.interest}, max_transactions={self.max_transactions}, curr_transactions={self.curr_transactions}, can_withdraw={self.can_withdraw}' #returns transactions left instead of max transactions
     
-    def reset_transactions(self):
+    def reset_transactions(self): #resets all accounts transactions this session
         self.curr_transactions = self.max_transactions
     
 class MortgageAccount(BasicAccount):        #Mortgage Bank Account
@@ -150,9 +150,9 @@ class MortgageAccount(BasicAccount):        #Mortgage Bank Account
         self.account_type = 'Mortgage'
         self.interest = 0.045
         self.balance = balance
-        self.can_withdraw = False
-        self.max_transactions = 1
-        self.curr_transactions = 1
+        self.can_withdraw = False           #prevents withdrawing from mortgage account
+        self.max_transactions = 1           #this needs to be a number for the code to work but it is never deducted from essentially allowing mortgage accounts to have unlimited transactions
+        self.curr_transactions = 1          #transactions for this session
 
 class LoyaltySaverAccount(BasicAccount):       #Loyalty Saver
     def __init__(self, balance, account_name):
@@ -178,7 +178,7 @@ class Customer:
 
     def add_account(self, account_type, balance):  #Appends account to accounts list
         if (bankus.bank_capital - balance) < -1000000:
-            print("This action will result in the bank's capital being lower than $-1,000,00")
+            print("This action will result in the bank's capital being lower than $-1,000,000")
             print(f"Current Bank Capital: {bankus.bank_capital}")
             print(f"Bank Capital after your action: {bankus.bank_capital - balance}")
             print("Please withdraw from an account to add money back to Bankus' Capital\n")
